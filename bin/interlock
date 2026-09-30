@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# Agent Overwatch operator CLI (for the human).
+#   status | selftest | tail | show
+#   pause <duration> [rule-scope...] | resume      (user-tier hook pause, no sudo)
+#   sudo bypass <duration> [--network] | sudo enforce   (managed all-layer bypass)
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+ADAPTER="claude-code"
+if [ "${1:-}" = "--adapter" ]; then ADAPTER="${2:-}"; shift 2; fi
+case "$ADAPTER" in claude-code|codex) ;; *) echo "unknown adapter: $ADAPTER" >&2; exit 2 ;; esac
+ENTRY="$ROOT/bin/interlock-$ADAPTER"
+if [ "$ADAPTER" = codex ] && { [ "${1:-}" = status ] || [ "${1:-}" = selftest ]; }; then
+  PYTHONPATH="$ROOT" exec python3 -m interlock.codex_diagnostics "$1"
+fi
+AUDIT_DIR="${INTERLOCK_AUDIT_DIR:-$HOME/.interlock/audit}"
+py_state() { PYTHONPATH="$ROOT" python3 -m interlock.state "$@"; }
+
+# --- managed master-bypass paths (used by sudo bypass/enforce) ---
+MANAGED="/etc/claude-code/managed-settings.json"
+MGMT_BAK="/etc/claude-code/managed-settings.enforcing.json"
+USER_BAK="/etc/claude-code/user-settings.enforcing.json"
+FLAG="${INTERLOCK_BYPASS:-/etc/claude-code/interlock-bypass.json}"
+RESTORE_UNIT="interlock-bypass-restore"
+REAL_USER="${SUDO_USER:-$(logname 2>/dev/null || echo "${USER:-}")}"
+REAL_HOME="$(getent passwd "$REAL_USER" 2>/dev/null | cut -d: -f6)"
+USER_SETTINGS="${REAL_HOME:-$HOME}/.claude/settings.json"
+# Relax reads (deny + ask + sandbox denyRead) in both tiers; keep denyWrite + hook.
+relax_files='.permissions.deny=[] | .permissions.ask=[] | (if .sandbox.filesystem then .sandbox.filesystem.denyRead=[] else . end)'
+relax_net='(if .sandbox then .sandbox.enabled=false else . end)'
+
+show_bypass() {
+  if [ -f "$FLAG" ]; then
+    python3 - "$FLAG" <<'PY'
+import sys, json, time
+try:
+    st = json.load(open(sys.argv[1]))
+    if float(st.get("paused_until", 0)) > time.time():
+        net = " +network" if st.get("network") else ""
+        print("⚠ MASTER BYPASS until " + time.strftime("%H:%M:%S", time.localtime(st["paused_until"]))
+              + net + " — restart Claude/Codex sessions if you haven't")
+    else:
+        print("enforcing (bypass expired)")
+except Exception:
+    print("enforcing")
+PY
+  else
+    py_state show
+  fi
+}
+
+case "${1:-help}" in
+  status)
+    echo "== Agent Overwatch status =="
+    echo "engine:  $ROOT/interlock/engine.py"
+    echo "adapter: $ADAPTER ($ENTRY)"
+    for s in "$PWD/.claude/settings.json" "$HOME/.claude/settings.json" "$MANAGED"; do
+      [ -f "$s" ] || continue
+      jq -e '.hooks.PreToolUse[]? | select((.hooks[0].command // "") | contains("interlock-'"$ADAPTER"'"))' "$s" >/dev/null 2>&1 \
+        && echo "wired:   $s"
+    done
+    [ -f "$MANAGED" ] && echo "managed: $MANAGED present (tamper-resistant tier)"
+    printf "state:   "; show_bypass
+    echo "last 10 decisions:"
+    cat "$AUDIT_DIR"/*.jsonl 2>/dev/null | tail -10 | jq -r '[.ts,.decision,.rule // "-",.tool,(.target|tostring|.[0:50])] | @tsv' 2>/dev/null \
+      || echo "  (no audit records yet)"
+    ;;
+  selftest)
+    printf '{"hook_event_name":"PreToolUse","session_id":"selftest","cwd":"/tmp","tool_name":"Read","tool_input":{"file_path":"/tmp/%s"}}' ".env" \
+      | python3 "$ENTRY" | jq .
+    echo "(expected: deny SEC-001 — unless bypassed/paused)"
+    ;;
+  tail)    tail -f "$AUDIT_DIR/$(date +%F).jsonl" ;;
+  pause)   shift; py_state pause "$@" ;;
+  resume)  py_state resume ;;
+  show)    show_bypass ;;
+
+  bypass)
+    [ "$(id -u)" = 0 ] || { echo "the master bypass needs root: sudo $ROOT/bin/interlock bypass ${2:-30m} ${3:-}"; exit 1; }
+    [ -f "$MANAGED" ] || { echo "no managed tier at $MANAGED — run sudo ./install-managed.sh first"; exit 1; }
+    shift; DUR="30m"; NET=0
+    for a in "$@"; do case "$a" in --network) NET=1 ;; *) DUR="$a" ;; esac; done
+    SECS="$(PYTHONPATH="$ROOT" python3 -c "import sys;from interlock import state;
+try: print(state.parse_duration('$DUR'))
+except Exception as e: print('ERR')")"
+    [ "$SECS" != ERR ] || { echo "bad duration '$DUR' — use 30s/30m/2h (max 12h)"; exit 1; }
+    JQ="$relax_files"; [ "$NET" = 1 ] && JQ="$relax_files | $relax_net"
+    # back up + relax MANAGED
+    [ -f "$MGMT_BAK" ] || cp "$MANAGED" "$MGMT_BAK"
+    jq "$JQ" "$MGMT_BAK" > "$MANAGED.tmp" && jq . "$MANAGED.tmp" >/dev/null && mv "$MANAGED.tmp" "$MANAGED"
+    chown root:root "$MANAGED"; chmod 644 "$MANAGED"
+    # back up + relax USER settings (same rules live there and are additive)
+    if [ -f "$USER_SETTINGS" ]; then
+      [ -f "$USER_BAK" ] || cp "$USER_SETTINGS" "$USER_BAK"
+      jq "$JQ" "$USER_BAK" > "$USER_SETTINGS.tmp" && jq . "$USER_SETTINGS.tmp" >/dev/null && mv "$USER_SETTINGS.tmp" "$USER_SETTINGS"
+      chown "$REAL_USER:$REAL_USER" "$USER_SETTINGS"; chmod 644 "$USER_SETTINGS"
+    fi
+    # set the root-owned hook flag (Layer 2 stands down live, still logs paused-bypass)
+    python3 - "$FLAG" "$SECS" "$NET" <<'PY'
+import sys, json, time
+open(sys.argv[1], "w").write(json.dumps({"paused_until": time.time()+int(sys.argv[2]),
+    "started": time.time(), "scope": "all", "network": sys.argv[3]=="1", "by": "sudo"}))
+PY
+    chmod 644 "$FLAG"
+    # schedule auto-restore
+    if command -v systemd-run >/dev/null 2>&1; then
+      systemctl stop "$RESTORE_UNIT.timer" 2>/dev/null || true
+      systemd-run --on-active="${SECS}s" --unit="$RESTORE_UNIT" "$ROOT/bin/interlock" enforce >/dev/null 2>&1 \
+        && SCHED="auto-restores in $DUR" || SCHED="WARN: schedule failed — run 'sudo $ROOT/bin/interlock enforce' when done"
+    else
+      SCHED="WARN: systemd-run missing — auto-restore NOT scheduled; run 'sudo $ROOT/bin/interlock enforce'"
+    fi
+    echo "⏸  MASTER BYPASS for $DUR$([ "$NET" = 1 ] && echo " (+network)"). $SCHED"
+    echo "   → RESTART your Claude/Codex sessions so Layers 1 & 3 (and network, if --network) relax."
+    ;;
+
+  enforce)
+    [ "$(id -u)" = 0 ] || { echo "needs root: sudo $ROOT/bin/interlock enforce"; exit 1; }
+    [ -f "$MGMT_BAK" ] && { cp "$MGMT_BAK" "$MANAGED"; chown root:root "$MANAGED"; chmod 644 "$MANAGED"; rm -f "$MGMT_BAK"; }
+    [ -f "$USER_BAK" ] && { cp "$USER_BAK" "$USER_SETTINGS"; chown "$REAL_USER:$REAL_USER" "$USER_SETTINGS"; chmod 644 "$USER_SETTINGS"; rm -f "$USER_BAK"; }
+    rm -f "$FLAG"
+    systemctl stop "$RESTORE_UNIT.timer" 2>/dev/null || true
+    echo "▶  ENFORCING restored (all layers). RESTART your Claude/Codex sessions to re-apply."
+    ;;
+
+  *)
+    echo "usage: interlock [--adapter claude-code|codex] <command>"
+    echo "  status | selftest | tail | show"
+    echo "  pause <duration> [rule-scope...]   user-tier hook pause (no sudo), e.g. pause 30m  |  pause 1h GIT-*"
+    echo "  resume                             end a pause"
+    echo "  sudo interlock bypass <dur> [--network]   master all-layer bypass, time-boxed (max 12h)"
+    echo "  sudo interlock enforce                    end the master bypass now"
+    echo "note: bypassing Layers 1 & 3 (and network) needs restarting your agent sessions."
+    ;;
+esac

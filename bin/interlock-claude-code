@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Claude Code hook entrypoint for Agent Overwatch. Claude Code runs this before every
+tool call with the event JSON on stdin. Fail-closed: any error exits 2 (Claude
+Code's hard-block code)."""
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def main():
+    from interlock import guard
+    from interlock.adapters.claude_code import ClaudeCodeAdapter
+    guard.process(ClaudeCodeAdapter(), json.loads(sys.stdin.read()))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Exception as exc:  # fail CLOSED — Claude Code treats exit 2 as a hard block
+        sys.stderr.write(f"Agent Overwatch failure ({type(exc).__name__}: {exc}); "
+                         "failing closed and blocking this action.\n")
+        sys.exit(2)

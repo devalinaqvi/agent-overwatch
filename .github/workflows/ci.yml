@@ -1,0 +1,23 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Validate policy JSON
+        run: python3 -c "import json; json.load(open('policy/policy.json')); print('policy.json OK')"
+      - name: Engine tests (portable core)
+        run: python3 tests/test_engine.py
+      - name: Claude Code adapter tests (end-to-end)
+        run: python3 tests/test_claude_code_adapter.py

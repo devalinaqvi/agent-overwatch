@@ -1,0 +1,47 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<div class="card square pad">
+  <div class="accent-top"></div>
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="z" style="display:flex;flex-direction:column;height:100%">
+    <div class="brand" style="margin-bottom:4px">
+      <svg width="58" height="58" viewBox="0 0 72 72" fill="none">
+        <rect x="1.5" y="1.5" width="69" height="69" rx="18" fill="#161b22" stroke="#2a3340"/>
+        <circle cx="30" cy="37" r="14" stroke="#f0a83c" stroke-width="6" fill="none"/>
+        <circle cx="44" cy="37" r="14" stroke="#5ed3c3" stroke-width="6" fill="none"/>
+        <path d="M30 23 a14 14 0 0 0 -12.1 21" stroke="#f0a83c" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="word" style="font-size:38px">Agent <b>Overwatch</b></div>
+      <div style="margin-left:auto" class="kicker" style="font-size:18px">Proof</div>
+    </div>
+
+    <h1 class="head" style="font-size:52px;margin:16px 0 4px">Two agents. One policy.<br>Both blocked reading <span style="color:var(--deny)">.env</span>.</h1>
+
+    <div class="term" style="margin-top:34px">
+      <div class="bar"><i style="background:#fb6a5f"></i><i style="background:#e3b341"></i><i style="background:#5cc26b"></i>
+        <span class="t">Codex CLI</span></div>
+      <div class="body" style="font-size:23px;padding:24px 30px">
+        <div class="row"><span class="prompt">›</span><span>read the env file in this project</span></div>
+        <div class="blocked" style="margin:12px 0">
+          <div><span class="bad">✗ Blocked by hook</span> &nbsp;<span class="rule">[Agent Overwatch SEC-030]</span></div>
+          <div class="indent" style="padding-left:26px">Command text references a .env file — do not retry through another wrapper.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="term" style="margin-top:24px">
+      <div class="bar"><i style="background:#fb6a5f"></i><i style="background:#e3b341"></i><i style="background:#5cc26b"></i>
+        <span class="t">Claude Code</span></div>
+      <div class="body" style="font-size:23px;padding:24px 30px">
+        <div class="row"><span class="prompt">›</span><span>cat .env</span></div>
+        <div class="blocked" style="margin:12px 0">
+          <div><span class="bad">✗ deny</span> &nbsp;<span class="rule">[Agent Overwatch SEC-001]</span></div>
+          <div class="indent" style="padding-left:26px">Environment files hold real credentials. This is a policy boundary.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="small" style="margin-top:auto">Same rules, both agents · every attempt logged, secrets redacted.</div>
+  </div>
+  <div class="foot" style="bottom:52px"><span></span>
+    <span class="repo"><span class="dot">●</span> github.com/devalinaqvi/agent-overwatch</span></div>
+</div>

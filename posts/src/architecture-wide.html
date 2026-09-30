@@ -1,0 +1,64 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<div class="card pad" style="width:1600px;height:1180px">
+  <div class="accent-top"></div>
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="z" style="display:flex;flex-direction:column;height:100%">
+    <div class="brand" style="margin-bottom:10px">
+      <svg width="60" height="60" viewBox="0 0 72 72" fill="none">
+        <rect x="1.5" y="1.5" width="69" height="69" rx="18" fill="#161b22" stroke="#2a3340"/>
+        <circle cx="30" cy="37" r="14" stroke="#f0a83c" stroke-width="6" fill="none"/>
+        <circle cx="44" cy="37" r="14" stroke="#5ed3c3" stroke-width="6" fill="none"/>
+        <path d="M30 23 a14 14 0 0 0 -12.1 21" stroke="#f0a83c" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="word" style="font-size:40px">Agent <b>Overwatch</b></div>
+      <div style="margin-left:auto;color:var(--muted);font-size:26px">Engine + adapters · one policy, every agent</div>
+    </div>
+
+    <div style="display:flex;gap:54px;flex:1;align-items:center">
+      <!-- pipeline -->
+      <div class="flow" style="flex:0 0 760px;margin:0">
+        <div class="agents" style="gap:32px;width:100%">
+          <div class="node" style="flex:1;min-width:0"><div class="n">Claude Code</div><div class="d">PreToolUse</div></div>
+          <div class="node" style="flex:1;min-width:0"><div class="n">Codex CLI</div><div class="d">PreToolUse</div></div>
+        </div>
+        <div class="arrow"></div>
+        <div class="node brandline" style="width:100%;min-width:0"><div class="n">Hook entrypoint</div><div class="d">fail-closed · exit 2 on error</div></div>
+        <div class="arrow"></div>
+        <div class="node" style="width:100%;min-width:0"><div class="n">Adapter</div><div class="d">parse() → Action</div></div>
+        <div class="arrow"></div>
+        <div class="node engine" style="width:100%;min-width:0"><div class="n">Engine.evaluate()</div><div class="d">portable · agent-agnostic</div></div>
+        <div class="arrow"></div>
+        <div class="legend" style="margin-top:0;width:100%;min-width:0">
+          <div class="pill allow"><div class="k">allow</div><div class="v">normal flow</div></div>
+          <div class="pill ask"><div class="k">ask</div><div class="v">human decides</div></div>
+          <div class="pill deny"><div class="k">deny</div><div class="v">blocked + logged</div></div>
+        </div>
+      </div>
+
+      <!-- rails -->
+      <div style="flex:0 0 440px;display:flex;flex-direction:column;gap:18px;justify-content:center">
+        <div class="rail" style="position:static">
+          <div class="rt">policy/policy.json</div>
+          <div class="rd">Human-readable rules with stable IDs:<br>SEC · DB · GIT · PKG · OVW · ESC · DEPLOY · MCP</div>
+        </div>
+        <div class="rail" style="position:static">
+          <div class="rt">Redacted audit log</div>
+          <div class="rd">Every decision recorded — secrets stripped before write.<br>~/.interlock/audit/YYYY-MM-DD.jsonl</div>
+        </div>
+        <div class="rail" style="position:static;border-color:var(--brand)">
+          <div class="rt" style="color:var(--brand)">Three enforcement layers</div>
+          <div class="rd">1 · settings deny-rules &nbsp; 2 · this hook &nbsp; 3 · OS sandbox<br>Root-owned managed tier the agent can't disable.</div>
+        </div>
+        <div class="rail" style="position:static">
+          <div class="rt">Human-only bypass</div>
+          <div class="rd">sudo · time-boxed (auto-restore) · still audited.<br>The agent can't pause or bypass the guard.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;color:var(--dim);font-size:23px;margin-top:8px">
+      <span>Same rules guard both agents — adding an agent means writing one adapter.</span>
+      <span class="repo" style="font-family:var(--mono);color:var(--muted)"><span style="color:var(--brand)">●</span> github.com/devalinaqvi/agent-overwatch</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<div class="card square pad">
+  <div class="accent-top"></div>
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="z">
+    <div class="brand">
+      <svg class="mark" width="76" height="76" viewBox="0 0 72 72" fill="none">
+        <rect x="1.5" y="1.5" width="69" height="69" rx="18" fill="#161b22" stroke="#2a3340"/>
+        <circle cx="30" cy="37" r="14" stroke="#f0a83c" stroke-width="6" fill="none"/>
+        <circle cx="44" cy="37" r="14" stroke="#5ed3c3" stroke-width="6" fill="none"/>
+        <path d="M30 23 a14 14 0 0 0 -12.1 21" stroke="#f0a83c" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="word">Agent <b>Overwatch</b></div>
+    </div>
+
+    <h1 class="head">A deterministic guard<br>for AI coding agents.</h1>
+    <p class="sub">It checks each tool call <b>before it runs</b> against a human-readable
+      policy and returns <span style="color:var(--allow)">allow</span> /
+      <span style="color:var(--ask)">ask</span> /
+      <span style="color:var(--deny)">deny</span> — with a redacted audit log of every decision.</p>
+
+    <div class="chips">
+      <div class="chip brand">Claude Code</div>
+      <div class="chip brand2">OpenAI Codex CLI</div>
+      <div class="chip">Fail-closed hook</div>
+      <div class="chip">OS-sandbox backstop</div>
+      <div class="chip">MIT</div>
+    </div>
+
+    <div class="legend">
+      <div class="pill allow"><div class="k">defer / allow</div><div class="v">edit a file · run the tests — normal flow</div></div>
+      <div class="pill ask"><div class="k">ask</div><div class="v">sudo · deploy — a human decides</div></div>
+      <div class="pill deny"><div class="k">deny</div><div class="v">read .env / keys · git push · DROP DATABASE</div></div>
+    </div>
+
+    <div style="margin-top:44px;font-family:var(--mono);font-size:26px;color:var(--muted);
+      background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:30px 34px;
+      display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <span style="color:var(--dim)">agent tries</span>
+      <span style="color:var(--text)">cat .env</span>
+      <span style="color:var(--dim)">→</span>
+      <span style="color:var(--deny);font-weight:700">deny</span>
+      <span style="color:var(--brand);font-weight:700">SEC-001</span>
+      <span style="color:var(--dim);margin-left:auto">blocked before it runs — and logged</span>
+    </div>
+  </div>
+
+  <div class="foot" style="bottom:56px">
+    <span style="font-size:22px;white-space:nowrap">Enforcement <b style="color:var(--text)">outside</b> the model</span>
+    <span class="repo" style="font-size:22px;white-space:nowrap"><span class="dot">●</span> github.com/devalinaqvi/agent-overwatch</span>
+  </div>
+</div>

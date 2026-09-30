@@ -1,0 +1,45 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<div class="card square pad">
+  <div class="accent-top"></div>
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="z" style="display:flex;flex-direction:column;height:100%">
+    <div class="brand" style="margin-bottom:6px">
+      <svg width="58" height="58" viewBox="0 0 72 72" fill="none">
+        <rect x="1.5" y="1.5" width="69" height="69" rx="18" fill="#161b22" stroke="#2a3340"/>
+        <circle cx="30" cy="37" r="14" stroke="#f0a83c" stroke-width="6" fill="none"/>
+        <circle cx="44" cy="37" r="14" stroke="#5ed3c3" stroke-width="6" fill="none"/>
+        <path d="M30 23 a14 14 0 0 0 -12.1 21" stroke="#f0a83c" stroke-width="6" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="word" style="font-size:38px">Agent <b>Overwatch</b></div>
+      <div style="margin-left:auto" class="kicker" style="font-size:18px">How it works</div>
+    </div>
+
+    <div class="flow" style="margin:14px auto 0">
+      <div class="agents">
+        <div class="node" style="min-width:320px;padding:16px 24px"><div class="n" style="font-size:26px">Claude Code</div></div>
+        <div class="node" style="min-width:320px;padding:16px 24px"><div class="n" style="font-size:26px">Codex CLI</div></div>
+      </div>
+      <div class="arrow" style="height:34px"></div>
+      <div class="node brandline" style="min-width:700px;padding:16px 24px"><div class="n" style="font-size:26px">PreToolUse hook <span style="color:var(--dim);font-weight:500;font-size:20px">· fail-closed</span></div></div>
+      <div class="arrow" style="height:30px"></div>
+      <div class="node" style="min-width:700px;padding:16px 24px"><div class="n" style="font-size:26px">Adapter → Action</div></div>
+      <div class="arrow" style="height:30px"></div>
+      <div class="node engine" style="min-width:700px;padding:18px 24px">
+        <div class="n" style="font-size:28px">Engine.evaluate( policy.json )</div>
+        <div class="d">SEC · DB · GIT · PKG · OVW · ESC · DEPLOY · MCP</div></div>
+      <div class="arrow" style="height:30px"></div>
+      <div class="legend" style="margin-top:0;min-width:820px">
+        <div class="pill allow" style="padding:16px 20px"><div class="k" style="font-size:24px">allow</div><div class="v">normal flow</div></div>
+        <div class="pill ask" style="padding:16px 20px"><div class="k" style="font-size:24px">ask</div><div class="v">human decides</div></div>
+        <div class="pill deny" style="padding:16px 20px"><div class="k" style="font-size:24px">deny</div><div class="v">blocked + logged</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:24px;margin-top:40px">
+      <div class="rail" style="position:static;flex:1"><div class="rt">Redacted audit log</div><div class="rd">every decision, secrets stripped</div></div>
+      <div class="rail" style="position:static;flex:1;border-color:var(--brand)"><div class="rt" style="color:var(--brand)">Human-only bypass</div><div class="rd">sudo · time-boxed · still audited</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>One policy guards both agents</span>
+    <span class="repo"><span class="dot">●</span> github.com/devalinaqvi/agent-overwatch</span></div>
+</div>

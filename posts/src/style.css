@@ -1,0 +1,95 @@
+/* Agent Overwatch visual system — shared by README images and LinkedIn cards.
+   All content is generic/redacted; no machine-specific tokens. */
+:root{
+  --bg:#0d1117; --panel:#161b22; --panel2:#1b2230; --border:#2a3340;
+  --text:#e6edf3; --muted:#9aa7b4; --dim:#6e7d8c;
+  --brand:#f0a83c; --brand2:#5ed3c3;
+  --deny:#f85149; --allow:#3fb950; --ask:#e3b341;
+  --mono:'DejaVu Sans Mono','Liberation Mono',ui-monospace,monospace;
+  --sans:'DejaVu Sans','Liberation Sans',system-ui,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+/* ---- page frames ---- */
+.card{position:relative;overflow:hidden}
+.square{width:1200px;height:1200px}
+.wide{width:1600px;height:1040px}
+.pad{padding:84px}
+.accent-top{position:absolute;top:0;left:0;right:0;height:10px;
+  background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.glow{position:absolute;border-radius:50%;filter:blur(120px);opacity:.16;z-index:0}
+.g1{width:640px;height:640px;background:var(--brand);top:-220px;right:-160px}
+.g2{width:560px;height:560px;background:var(--brand2);bottom:-220px;left:-160px}
+.z{position:relative;z-index:1}
+
+/* ---- brand lockup ---- */
+.brand{display:flex;align-items:center;gap:22px}
+.brand .mark{flex:0 0 auto}
+.brand .word{font-size:52px;font-weight:800;letter-spacing:-.5px}
+.brand .word b{color:var(--brand)}
+.kicker{color:var(--brand2);font-weight:700;letter-spacing:3px;text-transform:uppercase;font-size:20px}
+
+/* ---- typography ---- */
+h1.head{font-size:76px;line-height:1.06;font-weight:800;letter-spacing:-1.5px;margin:30px 0 0}
+.sub{font-size:31px;line-height:1.42;color:var(--muted);margin-top:26px;max-width:940px}
+.small{font-size:22px;color:var(--dim)}
+
+/* ---- chips ---- */
+.chips{display:flex;flex-wrap:wrap;gap:16px;margin-top:38px}
+.chip{border:1px solid var(--border);background:var(--panel);border-radius:999px;
+  padding:13px 24px;font-size:23px;color:var(--text);font-weight:600}
+.chip.brand{border-color:var(--brand);color:var(--brand)}
+.chip.brand2{border-color:var(--brand2);color:var(--brand2)}
+
+/* ---- footer ---- */
+.foot{position:absolute;left:84px;right:84px;bottom:64px;display:flex;
+  align-items:center;justify-content:space-between;color:var(--dim);font-size:24px}
+.foot .repo{font-family:var(--mono);color:var(--muted)}
+.foot .dot{color:var(--brand)}
+
+/* ---- terminal window ---- */
+.term{border:1px solid var(--border);border-radius:16px;background:#0b0f15;
+  overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.term .bar{display:flex;align-items:center;gap:10px;padding:18px 22px;
+  background:var(--panel);border-bottom:1px solid var(--border)}
+.term .bar i{width:15px;height:15px;border-radius:50%;display:inline-block}
+.term .bar .t{margin-left:14px;color:var(--muted);font-family:var(--mono);font-size:21px}
+.term .body{padding:30px 34px;font-family:var(--mono);font-size:25px;line-height:1.62}
+.r{color:#fb6a5f}.g{color:#5cc26b}.y{color:#e3b341}
+.term .body .prompt{color:var(--brand2)}
+.term .body .muted{color:var(--dim)}
+.term .body .ok{color:var(--allow)}
+.term .body .bad{color:var(--deny)}
+.term .body .rule{color:var(--brand);font-weight:700}
+.term .body .row{display:flex;gap:14px}
+.term .body .bullet{color:var(--dim)}
+.term .body .blocked{background:rgba(248,81,73,.10);border-left:3px solid var(--deny);
+  padding:14px 18px;border-radius:6px;margin:14px 0}
+.term .body .indent{padding-left:34px;color:var(--muted)}
+.term .body pre{margin:0;white-space:pre-wrap;word-break:break-word}
+
+/* ---- decision legend ---- */
+.legend{display:flex;gap:18px;margin-top:34px}
+.pill{flex:1;border:1px solid var(--border);border-radius:14px;padding:22px 24px;background:var(--panel)}
+.pill .k{font-family:var(--mono);font-size:26px;font-weight:800}
+.pill .v{color:var(--muted);font-size:21px;margin-top:8px;line-height:1.35}
+.pill.allow .k{color:var(--allow)}.pill.ask .k{color:var(--ask)}.pill.deny .k{color:var(--deny)}
+
+/* ---- architecture ---- */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0}
+.node{border:1px solid var(--border);background:var(--panel);border-radius:14px;
+  padding:22px 30px;text-align:center;min-width:520px}
+.node .n{font-size:30px;font-weight:800}
+.node .d{color:var(--muted);font-size:21px;margin-top:6px;font-family:var(--mono)}
+.node.brandline{border-color:var(--brand)}
+.node.engine{border-color:var(--brand2);background:var(--panel2)}
+.arrow{width:2px;height:44px;background:var(--border);position:relative}
+.arrow:after{content:"";position:absolute;bottom:0;left:-6px;border:7px solid transparent;
+  border-top-color:var(--border)}
+.agents{display:flex;gap:60px}
+.rail{position:absolute;border:1px dashed var(--border);border-radius:14px;
+  background:rgba(22,27,34,.6);padding:20px 24px}
+.rail .rt{color:var(--brand2);font-weight:700;font-size:22px;font-family:var(--mono)}
+.rail .rd{color:var(--muted);font-size:20px;margin-top:8px;line-height:1.4}

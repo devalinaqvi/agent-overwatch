@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""OpenAI Codex CLI hook entrypoint for Agent Overwatch. When installed, enabled and trusted, Codex invokes this for supported local
+tool calls with event JSON on stdin. Evaluator errors exit 2 (blocking); hook
+launch failures and timeouts are controlled by Codex, not this entrypoint."""
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def main():
+    from interlock import guard
+    from interlock.adapters.codex import CodexAdapter
+    guard.process(CodexAdapter(), json.loads(sys.stdin.read()))
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except Exception as exc:  # fail CLOSED — Codex treats exit 2 as a hard block
+        sys.stderr.write(f"Agent Overwatch failure ({type(exc).__name__}: {exc}); "
+                         "failing closed and blocking this action.\n")
+        sys.exit(2)

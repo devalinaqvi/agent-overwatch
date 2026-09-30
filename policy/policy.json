@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "policy_name": "interlock-default",
+  "fail_mode": "closed",
+
+  "protected_read": {
+    "basenames": [
+      {"id": "SEC-001", "pattern": ".env*", "exclude": [".env.example", ".env.sample", ".env.dist"], "reason": "Environment files hold real credentials"},
+      {"id": "SEC-002", "pattern": "*.pem", "exclude": [], "reason": "Private key material"},
+      {"id": "SEC-003", "pattern": "*.key", "exclude": [], "reason": "Private key material"},
+      {"id": "SEC-004", "pattern": "id_rsa", "exclude": [], "reason": "SSH private key"},
+      {"id": "SEC-005", "pattern": "id_ed25519", "exclude": [], "reason": "SSH private key"},
+      {"id": "SEC-006", "pattern": ".netrc", "exclude": [], "reason": "Stored machine credentials"},
+      {"id": "SEC-007", "pattern": ".git-credentials", "exclude": [], "reason": "Stored git credentials"},
+      {"id": "SEC-008", "pattern": "auth.json", "exclude": [], "reason": "Package-manager auth tokens"},
+      {"id": "SEC-009", "pattern": "credentials", "exclude": [], "reason": "Generic credentials file"},
+      {"id": "SEC-010", "pattern": "*.p12", "exclude": [], "reason": "Certificate/key bundle"}
+    ],
+    "prefixes": [
+      {"id": "SEC-020", "path": "~/.ssh", "reason": "SSH keys and agent config"},
+      {"id": "SEC-021", "path": "~/.aws", "reason": "Cloud credentials"},
+      {"id": "SEC-022", "path": "~/.config/gcloud", "reason": "Cloud credentials"},
+      {"id": "SEC-023", "path": "~/.config/gh", "reason": "GitHub CLI token"},
+      {"id": "SEC-024", "path": "~/.gnupg", "reason": "GPG private keys"},
+      {"id": "SEC-025", "path": "~/.docker/config.json", "reason": "Registry credentials"},
+      {"id": "SEC-026", "path": "~/.kube/config", "reason": "Cluster credentials"},
+      {"id": "SEC-027", "path": "~/.claude/.credentials.json", "reason": "Claude Code auth"},
+      {"id": "SEC-028", "path": "~/.npmrc", "reason": "npm auth token"}
+    ]
+  },
+
+  "protected_write": {
+    "prefixes": [],
+    "basenames": [
+      {"id": "OVW-007", "pattern": "hooks.json", "parent": ".codex", "reason": "Codex hook wiring is human-change-only"},
+      {"id": "OVW-008", "pattern": "config.toml", "parent": ".codex", "reason": "Codex permission wiring is human-change-only"},
+      {"id": "OVW-005", "pattern": "settings.json", "parent": ".claude", "reason": "Claude Code permission wiring is human-change-only"},
+      {"id": "OVW-006", "pattern": "settings.local.json", "parent": ".claude", "reason": "Claude Code permission wiring is human-change-only"}
+    ]
+  },
+
+  "bash": {
+    "deny": [
+      {"id": "GIT-001", "kind": "git_subcommand", "subcommands": ["push"], "reason": "Pushing to a remote requires the human to run the command"},
+      {"id": "GIT-002", "kind": "regex", "pattern": "\\bgh\\s+(pr\\s+merge|release\\s+(create|upload|edit|delete)|repo\\s+(delete|create|edit)|api\\s+(-X\\s*)?(POST|PUT|PATCH|DELETE))", "reason": "Remote mutation through the GitHub CLI"},
+      {"id": "GIT-003", "kind": "regex", "pattern": "\\bcurl\\b[^|;&]*-X\\s*(POST|PUT|PATCH|DELETE)[^|;&]*(github\\.com|gitlab\\.com|bitbucket)", "reason": "Remote repo mutation via raw API call"},
+      {"id": "DB-001", "kind": "regex", "pattern": "(?i)\\b(DROP\\s+(DATABASE|SCHEMA|TABLE)|TRUNCATE\\s+TABLE|TRUNCATE\\s+`?\\w+`?\\s*;)", "reason": "Destructive SQL against a database"},
+      {"id": "DB-002", "kind": "regex", "pattern": "\\bmysqladmin\\b.*\\bdrop\\b", "reason": "Database drop via mysqladmin"},
+      {"id": "PKG-001", "kind": "regex", "pattern": "\\bnpm\\s+publish\\b|\\byarn\\s+publish\\b|\\bpnpm\\s+publish\\b|\\btwine\\s+upload\\b|\\bcargo\\s+publish\\b|\\bgem\\s+push\\b", "reason": "Publishing a package release requires the human to run it"},
+      {"id": "SEC-030", "kind": "regex", "pattern": "(^|[\\s'\"=<>(:])\\.env(?!\\.example|\\.sample|\\.dist)(\\.|[\\s'\"),;:]|$)", "reason": "Command text references a .env file (best-effort text match)"},
+      {"id": "SEC-040", "kind": "regex", "pattern": "\\$\\{?[A-Za-z_]*(PASSWORD|SECRET|TOKEN|API_KEY|ACCESS_KEY)[A-Za-z_]*\\}?", "reason": "Expanding a credential-bearing environment variable"},
+      {"id": "OVW-010", "kind": "regex", "pattern": "\\binterlock\\s+(pause|resume|disable|off|stop|bypass|enforce)\\b", "reason": "Only a human may pause, bypass, or disable Agent Overwatch, from their own terminal"}
+    ],
+    "ask": [
+      {"id": "ESC-001", "kind": "regex", "pattern": "^\\s*sudo\\b|[;&|]\\s*sudo\\b", "reason": "Privilege escalation"},
+      {"id": "ESC-002", "kind": "regex", "pattern": "\\bchattr\\b|\\bsetfacl\\b", "reason": "Changing file protection attributes"},
+      {"id": "SEC-041", "kind": "regex", "pattern": "^\\s*(printenv|env)\\s*$|[;&|]\\s*(printenv|env)\\s*($|[;&|])", "reason": "Dumping the environment can leak secrets"},
+      {"id": "GIT-004", "kind": "git_subcommand", "subcommands": ["reset", "clean"], "reason": "History / worktree destruction needs a human decision"},
+      {"id": "DEPLOY-001", "kind": "regex", "pattern": "\\b(kubectl|helm|terraform|pulumi|aws|gcloud|az|flyctl|vercel|netlify)\\s+(apply|deploy|destroy|delete|push|rollout|up)\\b", "reason": "Infrastructure/deploy action needs a human decision"}
+    ],
+    "test_config_guard": {
+      "id": "DB-010",
+      "enabled": false,
+      "config_file": "phpunit.xml",
+      "runner_pattern": "(artisan\\s+test\\b|vendor/bin/pest\\b|vendor/bin/phpunit\\b|\\bpest\\b|\\bphpunit\\b)",
+      "safe_markers": ["<env\\s+name=\"DB_CONNECTION\"\\s+value=\"sqlite\"", "<env\\s+name=\"DB_DATABASE\"\\s+value=\":memory:\""],
+      "reason": "Test runner blocked: this directory's test config does not point at an isolated test database"
+    }
+  },
+
+  "mcp": {
+    "default": "deny",
+    "default_reason": "MCP tool not classified in policy; classify the server before use",
+    "servers": {}
+  },
+
+  "unknown_builtin_tool": "defer",
+  "dangerous_tool_params": [
+    {"id": "EXEC-001", "tool": "Bash", "param": "dangerouslyDisableSandbox", "equals": true, "decision": "ask", "reason": "Escaping the sandbox needs a human decision"}
+  ]
+}

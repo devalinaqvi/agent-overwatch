@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<div class="card" style="width:1240px;height:820px;padding:56px" >
+  <div class="glow g1"></div>
+  <div class="z">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:26px">
+      <div class="kicker" style="font-size:18px">Proof · OpenAI Codex CLI</div>
+      <div style="margin-left:auto;color:var(--dim);font-family:var(--mono);font-size:20px">blocked reading <b style="color:var(--deny)">.env</b> — rule SEC-030</div>
+    </div>
+    <div class="term">
+      <div class="bar"><i style="background:#fb6a5f"></i><i style="background:#e3b341"></i><i style="background:#5cc26b"></i>
+        <span class="t">codex — ~/project</span></div>
+      <div class="body">
+        <div class="row"><span class="prompt">›</span><span>read the env file in this project</span></div>
+        <div style="height:12px"></div>
+        <div class="row"><span class="bullet">•</span><span>I'll find the environment files and read them without displaying secret values.</span></div>
+        <div class="row"><span class="bullet">•</span><span class="bad">Failed (exit 1)</span><span class="muted">rg --files -g '*env*' --hidden</span></div>
+        <div class="blocked">
+          <div><span class="bad">✗ Blocked by hook</span></div>
+          <div class="indent"><span class="rule">[Agent Overwatch SEC-030]</span> Command text references a .env file
+            (best-effort text match). This is a policy boundary; do not retry through
+            another tool or wrapper.</div>
+        </div>
+        <div class="row"><span class="bullet">•</span><span>The environment-file search was blocked by Agent Overwatch
+          (<span class="rule">SEC-030</span>), which prohibits <span class="bad">.env</span> access.
+          I couldn't read its contents.</span></div>
+      </div>
+    </div>
+    <div class="small" style="margin-top:22px">Codex never reached the file — the search command itself tripped the rule. Every attempt is logged.</div>
+  </div>
+</div>

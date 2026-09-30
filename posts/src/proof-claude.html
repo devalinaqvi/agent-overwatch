@@ -1,0 +1,43 @@
+<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<div class="card" style="width:1240px;height:1180px;padding:56px">
+  <div class="glow g2"></div>
+  <div class="z">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:26px">
+      <div class="kicker" style="font-size:18px">Proof · Claude Code</div>
+      <div style="margin-left:auto;color:var(--dim);font-family:var(--mono);font-size:20px">secrets denied · sandbox holds</div>
+    </div>
+
+    <div class="term" style="margin-bottom:34px">
+      <div class="bar"><i style="background:#fb6a5f"></i><i style="background:#e3b341"></i><i style="background:#5cc26b"></i>
+        <span class="t">interlock selftest — reading a .env</span></div>
+      <div class="body">
+<pre><span class="muted">$ interlock selftest</span>
+{
+  "hookSpecificOutput": {
+    "permissionDecision": <span class="bad">"deny"</span>,
+    "permissionDecisionReason":
+      "<span class="rule">[Agent Overwatch SEC-001]</span> Environment files hold real
+       credentials. This is a policy boundary; do not
+       retry through another tool or wrapper."
+  }
+}
+<span class="muted">(expected: deny SEC-001)</span></pre>
+      </div>
+    </div>
+
+    <div class="term">
+      <div class="bar"><i style="background:#fb6a5f"></i><i style="background:#e3b341"></i><i style="background:#5cc26b"></i>
+        <span class="t">claude — the OS sandbox layer</span></div>
+      <div class="body">
+        <div class="row"><span class="prompt">›</span><span>log in to the production server over ssh</span></div>
+        <div style="height:12px"></div>
+        <div class="row"><span class="bullet">•</span><span>I can't open that SSH session from inside my sandbox — my
+          commands can't read your <span class="y">~/.ssh</span> directory, so the host alias from your SSH
+          config doesn't resolve (<span class="bad">Could not resolve hostname your-vps</span>).</span></div>
+        <div class="indent" style="margin-top:10px">To log in yourself, run: &nbsp;<span class="ok">! ssh your-vps</span></div>
+      </div>
+    </div>
+
+    <div class="small" style="margin-top:22px">Layer 2 (the hook) denies the secret; Layer 3 (the OS sandbox) blocks key access and egress. Lift both, only with <span style="color:var(--brand)">sudo interlock bypass --network</span>.</div>
+  </div>
+</div>

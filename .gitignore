@@ -1,0 +1,29 @@
+# Never commit secrets or local settings
+.env
+.env.*
+!.env.example
+*.local
+
+# Runtime state
+.interlock/
+*.jsonl
+.claude/settings.json
+.claude/settings.local.json
+*.pre-interlock.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Internal handoff notes (contain local paths — never publish)
+*-FOR-CLAUDE.md
+FIX-README-FOR-CLAUDE.md
